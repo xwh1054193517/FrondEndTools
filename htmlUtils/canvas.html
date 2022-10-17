@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <canvas id="test" width="600" height="600"></canvas>
+
+    <button id="download">点击下载</button>
+    <script>
+      function paint(id){
+        
+        const cvs=document.getElementById(id)
+        const ctx=cvs.getContext('2d')
+        let isDraw=false
+
+        // 当该像素是透明的，则设置成白色
+        var imageData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+        for (var i = 0; i < imageData.data.length; i += 4) {
+          if (imageData.data[i + 3] == 0) {
+            imageData.data[i] = 255;
+            imageData.data[i + 1] = 255;
+            imageData.data[i + 2] = 255;
+            imageData.data[i + 3] = 255;
+          }
+        }
+        ctx.putImageData(imageData, 0, 0);
+        cvs.addEventListener("mousedown",(e)=>{
+          e=e||window.event
+          isDraw=true
+          //将cvs移到开始处
+          ctx.moveTo(e.pageX,e.pageY)
+        })
+        cvs.addEventListener('mousemove',(e)=>{
+          e=e||window.event
+          if(isDraw){
+            ctx.lineTo(e.pageX,e.pageY)
+            ctx.stroke()
+          }
+        })
+        cvs.addEventListener("mouseup",(e)=>{
+          isDraw=false
+        })
+      }
+      document.getElementById('download').addEventListener('click',function(){
+        downloadCanvas('test')
+      })
+      paint('test')
+
+      function downloadCanvas(id){
+        const link=document.createElement('a')
+        //得到base64
+        let img=document.getElementById(id).toDataURL({format:'png',quality:1,width:200,height:200})
+        // 分割 得到图片格式
+        let arr=img.split(","),mime=arr[0].match(/:(.*?);/)[1]
+        //转成二进制格式
+        let bstr=atob(arr[1])
+        let n=bstr.length
+        let unit8arr=new Uint8Array(n)
+        while(n--){
+          unit8arr[n]=bstr.charCodeAt(n)
+        }
+        var blob=new Blob([unit8arr],{type:mime})
+        var objurl=URL.createObjectURL(blob)
+        link.download='canvas.png'
+        link.href=objurl
+        link.click()
+     
+      }
+    </script>
+</body>
+
+</html>

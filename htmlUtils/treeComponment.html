@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>demo</title>
+
+</head>
+<!-- 引入vue -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<!-- 引入ElementUI -->
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<body>
+
+    <div id="box">
+        <el-tree :data="source" :props="defaultProps" node-key=></el-tree>
+    </div>
+</body>
+<script type="text/javascript">
+    var box = new Vue({
+        el: "#box",
+        data: {
+            source: [
+            { id: 1, parentId: 0, name: "一级菜单A", rank: 1 },
+            { id: 2, parentId: 0, name: "一级菜单B", rank: 1 },
+            { id: 3, parentId: 0, name: "一级菜单C", rank: 1 },
+            { id: 4, parentId: 1, name: "二级菜单A-A", rank: 2 },
+            { id: 5, parentId: 1, name: "二级菜单A-B", rank: 2 },
+            { id: 6, parentId: 2, name: "二级菜单B-A", rank: 2 },
+            { id: 7, parentId: 4, name: "三级菜单A-A-A", rank: 3 },
+            { id: 8, parentId: 7, name: "四级菜单A-A-A-A", rank: 4 },
+            { id: 9, parentId: 8, name: "五级菜单A-A-A-A-A", rank: 5 },
+            { id: 10, parentId: 9, name: "六级菜单A-A-A-A-A-A", rank: 6 },
+            { id: 11, parentId: 10, name: "七级菜单A-A-A-A-A-A-A", rank: 7 },
+            { id: 12, parentId: 11, name: "八级菜单A-A-A-A-A-A-A-A", rank: 8 },
+            { id: 13, parentId: 12, name: "九级菜单A-A-A-A-A-A-A-A-A", rank: 9 },
+            { id: 14, parentId: 13, name: "十级菜单A-A-A-A-A-A-A-A-A-A", rank: 10 },
+          ],
+
+            defaultProps: {
+                children: 'children',
+                label: 'name'
+            }
+
+        },
+        mounted() {
+            this.source = this.treeData(this.source, 'id', 'parentId', 'children')
+
+        },
+        methods: {
+            treeData(source, id, parentId, children) {
+                //深复制
+                let cloneData = JSON.parse(JSON.stringify(source))
+                // console.log(cloneData);
+                //所有项目添加children
+                let temp={}
+                let tree=[]
+                for(let i=0;i<cloneData.length;i++){
+                  temp[cloneData[i].id]=cloneData[i]
+                }
+                // console.log(temp);
+                for(const id in temp){
+                  if(temp[id].parentId!=0){
+                    if(!temp[temp[id].parentId].children){
+                      temp[temp[id].parentId].children=[]
+                    }
+                    temp[temp[id].parentId].children.push(temp[id])
+                  }else{
+                    tree.push(temp[id])
+                  }
+                }
+                // console.log(tree)
+                return tree
+            }
+        },
+    })
+</script>
+
+</html>

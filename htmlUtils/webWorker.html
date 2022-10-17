@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    function loadWorker(url){
+      let worker=new Worker(url)
+      worker.postMessage("向worker发送了数据")
+      worker.addEventListener("message",function(event){
+        console.log("主线程接收到了",event.data);
+      })
+ // 子进程
+            //  2. 数据的获取（主线程发送消息给woker）
+            // addEventListener("message", function (evt) {
+            //     // evt.data
+            //     console.log(evt.data, "接受：子组件的数据");
+            // });
+            // postMessage("发送：子组件的数据");
+            // 最后会打印出来  父接收的数据（message里面的），然后是子接受的数据
+    }
+    loadWorker('webworker.js')
+  </script>
+</body>
+</html>
