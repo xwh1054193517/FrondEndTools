@@ -3,6 +3,9 @@
   <div class="inp">
   <input type="file" @change="handleFileChange"/>
   <el-button @click="handleUpload">upload</el-button>
+  
+  <el-button v-if="status === Status.pause" @click="handleResume">resume</el-button>
+  <el-button v-else @click="handlePause">pause</el-button>
   <el-button @click="handleDelete">delete</el-button>
   </div>
   <div class="progress">
@@ -38,8 +41,15 @@
 </template>
 
 <script>
+
+
 //切片大小
 const SIZE=10*1024*1024;
+const Status = {
+  wait: "wait",
+  pause: "pause",
+  uploading: "uploading"
+};
 
 export default{
   name:"app",
@@ -50,6 +60,7 @@ export default{
   },
   data(){
     return {
+      Status,
       container:{
         file:null,
         hash:"",
@@ -62,7 +73,8 @@ export default{
     // 当暂停时会取消 xhr 导致进度条后退
     // 为了避免这种情况，需要定义一个假的进度条
       fakeUploadProgress:0,
-      curHash:0
+      curHash:0,
+      status:Status.wait
     }
   },
   computed:{
@@ -82,6 +94,18 @@ export default{
     }
   },
   methods:{
+    handlePause(){
+      this.status=Status.pause
+      this.resetData()
+    },
+    async handleResume(){
+      this.status=Status.uploading
+      const {uploadedList}=await this.verifyUpload(
+        this.container.file.name,
+        this.container.hash
+      )
+      await this.uploadChunk(uploadedList)
+    },
         //中断请求，清除绑定事件
     resetData(){
       this.requestList.forEach(xhr=>xhr?.abort())
@@ -163,6 +187,7 @@ export default{
 
     async handleUpload(){
       if(!this.container.file)return
+      this.status=Status.uploading
       //分割文件
       const fileChunkList=this.createFileChunk(this.container.file)
 
@@ -181,6 +206,7 @@ export default{
       console.log("shouldUpload:",shouldUpload);
       if (!shouldUpload) {
         this.$message.success("skip upload:file upload success");
+        this.status=Status.wait
         return;
       }
 
@@ -201,7 +227,7 @@ export default{
 
     //上传切片
     async uploadChunk(uploadedList=[]){
-      const requestData=this.data
+      const requestList=this.data
       .filter(({hash})=>!uploadedList.includes(hash))
       .map(({chunk,hash,index})=>{
         const formData=new FormData()
@@ -216,15 +242,16 @@ export default{
         this.request({
           url:"http://localhost:3000",
           data:formData,
-          onProgress:this.createProgressHandler(this.data[index])
+          onProgress:this.createProgressHandler(this.data[index]),
+          requestList:this.requestList
         })
       );
       //并发请求
-      await Promise.all(requestData)
-      // console.log(uploadedList.length,requestData.length,this.data.length);
+      await Promise.all(requestList)
+      console.log(uploadedList.length,requestList,this.data.length);
       // 之前上传的切片数量 + 本次上传的切片数量 = 所有切片数量时合并切片
-      if(uploadedList.length+requestData.length===this.data.length){
-        // console.log('该合并了');
+      if(uploadedList.length+requestList.length===this.data.length){
+        console.log('该合并了');
         await this.mergeRequest()
       }
      
@@ -242,7 +269,10 @@ export default{
           fileHash:this.container.hash,
           size:SIZE
         })
+      
       })
+      this.$message.success("upload success")
+      this.status=Status.wait
     },
 
     //验证文件是否已经被上传

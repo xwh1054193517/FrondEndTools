@@ -15,6 +15,11 @@ self.onmessage = e => {
     reader.onload = e => {
       count++;
       spark.append(e.target.result);
+      // 在 worker 线程中，接受文件切片 fileChunkList，
+      // 利用 fileReader 读取每个切片的 ArrayBuffer 并不断传入 spark-md5 中，每计算完一个切片通过 postMessage 向主线程发送一个进度事件，
+      // 全部完成后将最终的 hash 发送给主线程
+
+
       if (count === fileChunkList.length) {
         self.postMessage({
           percentage: 100,
