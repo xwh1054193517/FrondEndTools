@@ -1,6 +1,16 @@
 // 函数柯里化指的是一种将使用多个参数的一个函数
 // 转换成一系列使用一个参数的函数的技术。
-
+function myCurry(fn,...args){
+  const len=fn.length
+  return function(...params){
+    let curArgs=[...args,...params]
+    if(curArgs.length>=len){
+      return fn.apply(this,curArgs)
+    }else{
+      return myCurry.bind(this,fn,...curArgs)
+    }
+  }
+}
 function curry(fn, ...args) {
   //获取函数需要的参数长度
   const len = fn.length
@@ -28,18 +38,5 @@ function add(a, b, c) {
 var addCurry = curry(add)
 console.log(addCurry(2)(3)(1))
 
-function  myCurry(fn,...args){
-  const len=fn.length
-  return function(...params){
-    let curryArgs=[...args,...params]
-    if(curryArgs.length>=len){
-      fn.apply(this,...curryArgs)
-    }else{
-      return curry.call(this,fn,...curryArgs)
-    }
-  }
-}
 
-function myCurryEs6(fn,...args){
-  return fn.length<=args.length?fn(...args):myCurryEs6.bind(null,fn,...args)
-}
+

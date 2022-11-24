@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+      }
+
+      #canvas {
+        background: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <script>
+      var canvas = document.getElementById('canvas'),
+        ctx = canvas.getContext('2d'),
+        WIDTH = (canvas.width = document.documentElement.clientWidth),
+        HEIGHT = (canvas.height = document.documentElement.clientHeight)
+
+      // / 存放圆的数组
+      var round_arr = [],
+        color1,
+        color2
+
+      var param = {
+        num: 100,
+        color: false,
+        r: 0.9,
+        o: 0.09,
+        a: 1,
+      }
+      //移动添加圆的信息
+      window.onmousemove = function (e) {
+        let mouseX = e.clientX
+        let mouseY = event.clientY
+        round_arr.push({
+          mouseX,
+          mouseY,
+          r: param.r, // 设置半径每次增大的数值
+          o: 1, //  判断圆消失的条件，数值越大，消失得越快
+        })
+      }
+      if (param.color) {
+        color2 = param.color
+      } else {
+        color = Math.random() * 360
+      }
+      function animate() {
+        if (!param.color) {
+          color += 0.1
+          // 色相（H）
+          // 饱和度（S）
+          // 亮度（L）
+          // 透明度（A）
+          color2 = `hsl(${color},100%,80%)`
+        }
+        ctx.clearRect(0, 0, WIDTH, HEIGHT)
+        for (let i = 0; i < round_arr.length; i++) {
+          ctx.fillStyle = color2
+          ctx.beginPath()
+          ctx.arc(
+            round_arr[i].mouseX,
+            round_arr[i].mouseY,
+            round_arr[i].r,
+            0,
+            Math.PI * 2
+          )
+          ctx.closePath()
+          ctx.fill()
+          round_arr[i].r += param.r
+          round_arr[i].o -= param.o
+          if (round_arr[i].o <= 0) {
+            round_arr.splice(i, 1)
+            i--
+          }
+        }
+        window.requestAnimationFrame(animate)
+      }
+      animate()
+    </script>
+  </body>
+</html>

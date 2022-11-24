@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片合并</title>
+</head>
+<body>
+    <canvas id="cvs" width="300" height="450" style="width: 300px;"></canvas>
+    <div><button onclick="download()">下载图片</button></div>
+    <script src="./mergeImage.js"></script>
+    <script>
+        function download() {
+            const a = document.createElement('a')
+            a.href = cvs.toDataURL('image/png')
+            a.setAttribute('download', 'canvas.png')
+            a.click()
+        }
+        new Draw({
+            el: document.getElementById('cvs'),
+            bl: 1,
+            renderList: [
+                {
+                    type: 'image',
+                    src: './images/zj-bg.jpeg',
+                    width: 300,
+                    height: 450,
+                    x: 0,
+                    y: 0
+                },
+                {
+                    type: 'image',
+                    src: './images/hongbao.png',
+                    clipCircle: true,
+                    clipLineWidth: 10,
+                    clipStrokeStyle: '#ffffff',
+                    width: 60,
+                    height: 60,
+                    x: 120,
+                    y: 20
+                },
+                {
+                    type: 'text',
+                    text: '我的名字我的名字',
+                    align: 'center',
+                    fontSize: 20,
+                    fillStyle: '#333',
+                    x: 150,
+                    y: 120
+                },
+                {
+                    type: 'image',
+                    src: './images/clock.png',
+                    width: 80,
+                    height: 80,
+                    x: 200,
+                    y: 350
+                }
+            ]
+        })
+    </script>
+</body>
+</html>

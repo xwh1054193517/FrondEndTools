@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    html,body {
+        margin:0;
+        overflow:hidden;
+        width:100%;
+        height:100%;
+        cursor:none;
+        background:black;
+    }
+</style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <button onclick="refresh()">刷新
+  <script>
+let ctx = document.getElementById('canvas'),
+        context = ctx.getContext('2d');
+    ctx.width = document.documentElement.clientWidth;
+    ctx.height = document.documentElement.clientHeight*90/100;
+
+    class RodundItem {
+        constructor(index, x, y) {
+                this.index = index;
+                this.x = x;
+                this.y = y;
+                this.r = Math.random() * 2 + 1;
+                let alpha = Math.random().toFixed(2);
+                this.color = `rgba(255,255,255,${alpha})`
+            }
+            //绘制
+        draw() {
+            context.fillStyle = this.color;
+            context.shadowBlur = this.r * 2;
+            context.beginPath();
+            context.arc(this.x, this.y, this.r, 0, Math.PI * 2, false);
+            context.closePath();
+            context.fill();
+        }
+        move(){
+          this.y-=0.15
+          if(this.y<=-10){
+            this.y=ctx.height+10
+          }
+          this.draw()
+        }
+    }
+    let round=[]
+    const init = (roundCount) => {
+        for (let i = 0; i < roundCount; i++) {
+            let random = () => Math.random();
+            round[i]=new RodundItem(i, random() * ctx.width, random() * ctx.height)
+            round[i].draw()
+        }
+    }
+    
+
+    const animate=()=>{
+      context.clearRect(0,0,ctx.width,ctx.height)
+      for(let item of round){
+        item.move()
+      }
+      requestAnimationFrame(animate)
+    }
+    init(500);
+    animate()
+
+const refresh=()=>{
+      context.clearRect(0, 0, ctx.width, ctx.height)
+  init(Math.round(Math.random()*10000%1000));
+}
+  </script>
+</body>
+</html>
